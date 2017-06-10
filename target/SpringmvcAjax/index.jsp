@@ -1,5 +1,4 @@
 <%@page session="false"%>
-
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,6 +9,50 @@
 
 <script type="text/javascript" src="./resources/js/jquery.js"></script>
 <script type="text/javascript" src="./resources/js/bootstrap.min.js"></script>
+<script>
+	jQuery(document).ready(function($) {
+		$("#search-form").submit(function(event) {
+			// Disble the search button
+			enableSearchButton(false);
+			// Prevent the form from submitting via the browser.
+			event.preventDefault();
+			searchViaAjax();
+		});
+	});
+	function searchViaAjax() {
+		var search = {};
+		search["username"] = $("#username").val();
+		search["email"] = $("#email").val();
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			url : "search/getSearchResult",
+			data : JSON.stringify(search),
+			dataType : 'json',
+			timeout : 100000,
+			success : function(data) {
+				console.log("SUCCESS: ", data);
+				display(data);
+			},
+			error : function(e) {
+				console.log("ERROR: ", e);
+				display(e);
+			},
+			done : function(e) {
+				console.log("DONE");
+				enableSearchButton(true);
+			}
+		});
+	}
+	function enableSearchButton(flag) {
+		$("#btn-search").prop("disabled", flag);
+	}
+	function display(data) {
+		var json = "<h4>Ajax Response</h4><pre>"
+				+ JSON.stringify(data, null, 4) + "</pre>";
+		$('#feedback').html(json);
+	}
+</script>
 
 </head>
 
@@ -58,55 +101,11 @@
 <div class="container">
 	<footer>
 		<p>
-			&copy; <a href="happy.jsp">Mkyong.com</a> 2015
+			&copy; <a href="">SOURCE CODE</a>
 		</p>
 	</footer>
 </div>
 
-<script>
-	jQuery(document).ready(function($) {
-		$("#search-form").submit(function(event) {
-			// Disble the search button
-			enableSearchButton(false);
-			// Prevent the form from submitting via the browser.
-			event.preventDefault();
-			searchViaAjax();
-		});
-	});
-	function searchViaAjax() {
-		var search = {}
-		search["username"] = $("#username").val();
-		search["email"] = $("#email").val();
-		$.ajax({
-			type : "POST",
-			contentType : "application/json",
-			url : "search/getSearchResult",
-			data : JSON.stringify(search),
-			dataType : 'json',
-			timeout : 100000,
-			success : function(data) {
-				console.log("SUCCESS: ", data);
-				display(data);
-			},
-			error : function(e) {
-				console.log("ERROR: ", e);
-				display(e);
-			},
-			done : function(e) {
-				console.log("DONE");
-				enableSearchButton(true);
-			}
-		});
-	}
-	function enableSearchButton(flag) {
-		$("#btn-search").prop("disabled", flag);
-	}
-	function display(data) {
-		var json = "<h4>Ajax Response</h4><pre>"
-				+ JSON.stringify(data, null, 4) + "</pre>";
-		$('#feedback').html(json);
-	}
-</script>
 
 </body>
 </html>
