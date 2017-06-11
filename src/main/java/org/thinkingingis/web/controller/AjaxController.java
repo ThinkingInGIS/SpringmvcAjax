@@ -5,6 +5,10 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,15 +20,16 @@ import org.thinkingingis.web.model.User;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-
 @RestController
 @RequestMapping("search")
 public class AjaxController {
 
 	List<User> users;
 
-	// @ResponseBody, not necessary, since class is annotated with @RestController
-	// @RequestBody - Convert the json data into object (SearchCriteria) mapped by field name.
+	// @ResponseBody, not necessary, since class is annotated with
+	// @RestController
+	// @RequestBody - Convert the json data into object (SearchCriteria) mapped
+	// by field name.
 	// @JsonView(Views.Public.class) - Optional, filters json data to display.
 	@JsonView(Views.Public.class)
 	@RequestMapping("getSearchResult")
@@ -33,12 +38,14 @@ public class AjaxController {
 		AjaxResponseBody result = new AjaxResponseBody();
 
 		if (isValidSearchCriteria(search)) {
-			List<User> users = findByUserNameOrEmail(search.getUsername(), search.getEmail());
-
-			if (users.size() > 0) {
+//			System.out.println(search.getUsername());
+//			System.out.println(search.getEmail());
+			User user = findByUserNameOrEmail(search.getUsername(),
+					search.getEmail());
+			if (user != null) {
 				result.setCode("200");
 				result.setMsg("Found the user!");
-				result.setResult(users);
+				result.setUser(user);
 			} else {
 				result.setCode("204");
 				result.setMsg("No user!");
@@ -49,7 +56,8 @@ public class AjaxController {
 			result.setMsg("Search criteria is empty!");
 		}
 
-		//AjaxResponseBody will be converted into json format and send back to the request.
+		// AjaxResponseBody will be converted into json format and send back to
+		// the request.
 		return result;
 
 	}
@@ -62,62 +70,42 @@ public class AjaxController {
 			valid = false;
 		}
 
-		if ((StringUtils.isEmpty(search.getUsername())) && (StringUtils.isEmpty(search.getEmail()))) {
+		if ((StringUtils.isEmpty(search.getUsername()))
+				&& (StringUtils.isEmpty(search.getEmail()))) {
 			valid = false;
 		}
 
 		return valid;
 	}
 
-	// Init some users for testing
-	@PostConstruct
-	private void iniDataForTesting() {
-		users = new ArrayList<User>();
-
-		User user1 = new User("ThinkingInGIS", "gis123", "twicethoughts@gmail.com", "13520527365", "BJ");
-		User user2 = new User("Thinking", "gis456", "twicethoughts@gmail.com", "13520527365", "bj");
-		User user3 = new User("In", "gis789", "twicethoughts@gmail.com", "13520527365", "bj");
-		User user4 = new User("GIS", "gis789", "twicethoughts@gmail.com", "13520527365", "bj");
-		users.add(user1);
-		users.add(user2);
-		users.add(user3);
-		users.add(user4);
-
-	}
-
-	// Simulate the search function
-	private List<User> findByUserNameOrEmail(String username, String email) {
-
-		List<User> result = new ArrayList<User>();
-
-		for (User user : users) {
-
-			if ((!StringUtils.isEmpty(username)) && (!StringUtils.isEmpty(email))) {
-
-				if (username.equals(user.getUsername()) && email.equals(user.getEmail())) {
-					result.add(user);
-					continue;
-				} else {
-					continue;
-				}
-
+	private User findByUserNameOrEmail(String username, String email) {
+		Configuration cfg = new Configuration().configure();
+		SessionFactory factory = cfg.buildSessionFactory();
+		Session session = null;
+		User user = new User();
+		session = factory.openSession();
+		if (username != "" && email == "") {
+			session.beginTransaction();
+			String hql = " from User where username=?";
+			Query query = session.createQuery(hql);
+			query.setString(0, username);
+			ArrayList<User> list = ((ArrayList<User>) query.list());
+			if(list.size()>0){
+				user = list.get(0);
+				return user;
 			}
-			if (!StringUtils.isEmpty(username)) {
-				if (username.equals(user.getUsername())) {
-					result.add(user);
-					continue;
-				}
-			}
-
-			if (!StringUtils.isEmpty(email)) {
-				if (email.equals(user.getEmail())) {
-					result.add(user);
-					continue;
-				}
+		} else if (email != "") {
+			session.beginTransaction();
+			String hql = " from User where email=?";
+			Query query = session.createQuery(hql);
+			query.setString(0, email);
+			ArrayList<User> list = ((ArrayList<User>) query.list());
+			if(list.size()>0){
+				user = list.get(0);
+				return user;
 			}
 		}
-
-		return result;
-
+//		session.close();
+		return null;
 	}
 }

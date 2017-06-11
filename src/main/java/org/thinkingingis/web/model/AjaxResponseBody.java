@@ -15,7 +15,7 @@ public class AjaxResponseBody {
 	String code;
 
 	@JsonView(Views.Public.class)
-	List<User> result;
+	User user;
 
 	public String getMsg() {
 		return msg;
@@ -33,11 +33,21 @@ public class AjaxResponseBody {
 		this.code = code;
 	}
 
-	public List<User> getResult() {
-		return result;
+	public User getUser() {
+		return user;
 	}
 
-	public void setResult(List<User> result) {
-		this.result = result;
+	public void setUser(User user) {
+		this.user = user;
 	}
+
+	
+	
+//	public List<User> getResult() {
+//		return result;
+//	}
+//
+//	public void setResult(List<User> result) {
+//		this.result = result;
+//	}
 }

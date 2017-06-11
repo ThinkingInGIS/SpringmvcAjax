@@ -5,6 +5,8 @@ import org.thinkingingis.web.jsonview.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 
 public class User {
+	
+	String id;
 	@JsonView(Views.Public.class)
 	String username;
 
@@ -17,6 +19,14 @@ public class User {
 	String phone;
 
 	String address;
+	
+	
+	
+	public User() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 
 	public User(String username, String password, String email, String phone, String address) {
 		this.username = username;
@@ -25,6 +35,17 @@ public class User {
 		this.phone = phone;
 		this.address = address;
 	}
+	
+	
+	public String getId() {
+		return id;
+	}
+
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 
 	public String getUsername() {
 		return username;
